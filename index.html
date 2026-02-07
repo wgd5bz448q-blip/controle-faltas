@@ -406,7 +406,12 @@
             </div>
 
             <div class="field full">
-              <button type="submit" title="Confirmar falta" aria-label="Confirmar falta">Confirmar falta</button>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                <button id="btn-cadastrar-aluno" type="button" class="btn-secondary" title="Cadastrar aluno" aria-label="Cadastrar aluno">
+                  Cadastrar aluno
+                </button>
+                <button type="submit" title="Confirmar falta" aria-label="Confirmar falta">Confirmar falta</button>
+              </div>
             </div>
           </form>
         </details>
@@ -456,6 +461,7 @@
       const btnLoginGoogle = document.getElementById("btn-login-google");
       const btnLogout = document.getElementById("btn-logout");
       const btnAbrirCadastro = document.getElementById("btn-abrir-cadastro");
+      const btnCadastrarAluno = document.getElementById("btn-cadastrar-aluno");
       const authIndicador = document.getElementById("auth-indicador");
       const usarObservacao = document.getElementById("usar-observacao");
       const campoObservacao = document.getElementById("campo-observacao");
@@ -575,6 +581,16 @@
           .replaceAll('"', "&quot;")
           .replaceAll("'", "&#39;");
 
+      const normalizarNome = (nome) => String(nome || "").trim().toLocaleLowerCase("pt-BR");
+
+      const existeAlunoNaDisciplina = (nome, disciplina) => {
+        const nomeNormalizado = normalizarNome(nome);
+        return registros.some(
+          (registro) =>
+            registro.disciplina === disciplina && normalizarNome(registro.nome) === nomeNormalizado
+        );
+      };
+
       const atualizarListaAlunos = () => {
         const nomesUnicos = [...new Set(registros.map((r) => r.nome.trim()).filter(Boolean))].sort((a, b) =>
           a.localeCompare(b, "pt-BR")
@@ -628,7 +644,7 @@
             alunos.set(nomeNormalizado, {
               nome: registro.nome.trim(),
               total: 0,
-              ultimoRegistro: "",
+              ultimoRegistro: "-",
               ultimoIndice: indice,
               ultimoTimestamp: "",
               dias: [],
@@ -637,16 +653,18 @@
 
           const aluno = alunos.get(nomeNormalizado);
           aluno.total += faltaHoras;
-          if (!aluno.ultimoTimestamp || registro.data >= aluno.ultimoTimestamp) {
+          if (faltaHoras > 0 && (!aluno.ultimoTimestamp || registro.data >= aluno.ultimoTimestamp)) {
             aluno.ultimoRegistro = `${formatarData(registro.data)} (${faltaHoras}h)`;
             aluno.ultimoIndice = indice;
             aluno.ultimoTimestamp = registro.data;
           }
-          aluno.dias.push({
-            data: registro.data,
-            horas: faltaHoras,
-            observacao: registro.observacao || "",
-          });
+          if (faltaHoras > 0) {
+            aluno.dias.push({
+              data: registro.data,
+              horas: faltaHoras,
+              observacao: registro.observacao || "",
+            });
+          }
         });
 
         [...alunos.values()]
@@ -987,6 +1005,66 @@
           atualizarBotoesDisciplina(botoesDisciplinaForm, disciplinaInput.value);
           nomeInput.focus();
         }
+        atualizarPainelCadastro();
+      });
+
+      btnCadastrarAluno.addEventListener("click", async () => {
+        const nome = nomeInput.value.trim();
+        const disciplina = disciplinaInput.value;
+        if (!nome || !disciplina) {
+          alert("Preencha nome e disciplina para cadastrar o aluno.");
+          return;
+        }
+
+        if (existeAlunoNaDisciplina(nome, disciplina)) {
+          alert("Este aluno ja esta cadastrado nesta disciplina.");
+          return;
+        }
+
+        const registroCadastro = {
+          nome,
+          disciplina,
+          data: dataHojeISO(),
+          falta: "0",
+          observacao: "",
+        };
+
+        if (usandoFirebase) {
+          if (!auth.currentUser) {
+            alert("Faca login para cadastrar na nuvem.");
+            return;
+          }
+          try {
+            await db.collection("faltas").add({
+              nome: registroCadastro.nome,
+              nomeNormalizado: registroCadastro.nome.toLocaleLowerCase("pt-BR"),
+              disciplina: registroCadastro.disciplina,
+              data: registroCadastro.data,
+              faltaHoras: 0,
+              observacao: "",
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+          } catch (_error) {
+            alert("Nao foi possivel cadastrar aluno no Firebase.");
+            return;
+          }
+        } else {
+          registros.push(registroCadastro);
+          salvarRegistrosLocal();
+          atualizarListaAlunos();
+          atualizarTabela();
+        }
+
+        filtroDisciplina.value = disciplina;
+        atualizarBotoesDisciplina(botoesFiltroDisciplina, filtroDisciplina.value);
+        form.reset();
+        preencherDataComHoje();
+        atualizarModoLancamento(false);
+        usarObservacao.checked = false;
+        atualizarCampoObservacao();
+        disciplinaInput.value = filtroDisciplina.value;
+        atualizarBotoesDisciplina(botoesDisciplinaForm, disciplinaInput.value);
+        painelCadastro.open = false;
         atualizarPainelCadastro();
       });
 
