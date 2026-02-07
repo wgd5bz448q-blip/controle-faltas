@@ -393,7 +393,7 @@
               </select>
             </div>
 
-            <div class="field">
+            <div id="campo-toggle-observacao" class="field">
               <label style="font-weight: 600; cursor: pointer">
                 <input id="usar-observacao" type="checkbox" style="height: auto; margin-right: 8px" />
                 Adicionar observacao deste dia
@@ -406,7 +406,7 @@
             </div>
 
             <div class="field full">
-              <div style="display: flex; gap: 8px; flex-wrap: wrap">
+              <div id="acoes-cadastro" style="display: flex; gap: 8px; flex-wrap: wrap">
                 <button id="btn-cadastrar-aluno" type="button" class="btn-secondary" title="Cadastrar aluno" aria-label="Cadastrar aluno">
                   Cadastrar aluno
                 </button>
@@ -416,7 +416,7 @@
           </form>
         </details>
 
-        <div class="table-wrap">
+        <div id="painel-turma" class="table-wrap">
           <div class="field" style="max-width: 520px; margin-bottom: 12px">
             <label>Disciplina exibida na tabela</label>
             <div class="disciplina-tabs" id="filtro-disciplina-tabs">
@@ -465,9 +465,12 @@
       const authIndicador = document.getElementById("auth-indicador");
       const usarObservacao = document.getElementById("usar-observacao");
       const campoObservacao = document.getElementById("campo-observacao");
+      const campoToggleObservacao = document.getElementById("campo-toggle-observacao");
       const campoNome = document.getElementById("campo-nome");
       const campoDisciplina = document.getElementById("campo-disciplina");
       const campoModoRapido = document.getElementById("campo-modo-rapido");
+      const painelTurma = document.getElementById("painel-turma");
+      const acoesCadastro = document.getElementById("acoes-cadastro");
       const alunoSelecionadoRapido = document.getElementById("aluno-selecionado-rapido");
       const nomeInput = document.getElementById("nome");
       const dataInput = document.getElementById("data");
@@ -553,6 +556,14 @@
         campoNome.classList.toggle("hidden", rapido);
         campoDisciplina.classList.toggle("hidden", rapido);
         campoModoRapido.classList.toggle("hidden", !rapido);
+        painelTurma.classList.toggle("hidden", rapido);
+        campoToggleObservacao.classList.toggle("hidden", rapido);
+        if (rapido) {
+          usarObservacao.checked = false;
+          atualizarCampoObservacao();
+        }
+        btnCadastrarAluno.style.display = rapido ? "none" : "inline-flex";
+        acoesCadastro.style.justifyContent = rapido ? "flex-start" : "flex-start";
         alunoSelecionadoRapido.textContent = rapido ? `Aluno selecionado: ${nome}` : "";
       };
 
