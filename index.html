@@ -954,19 +954,13 @@
           await auth.signInWithPopup(provider);
         } catch (error) {
           const codigo = error && error.code ? error.code : "erro-desconhecido";
-          if (
-            codigo === "auth/popup-blocked" ||
-            codigo === "auth/popup-closed-by-user" ||
-            codigo === "auth/cancelled-popup-request"
-          ) {
-            try {
-              await auth.signInWithRedirect(provider);
-              return;
-            } catch (erroRedirect) {
-              const codigoRedirect = erroRedirect && erroRedirect.code ? erroRedirect.code : "erro-desconhecido";
-              alert(`Falha no login Google (${codigoRedirect}).`);
-              return;
-            }
+          if (codigo === "auth/popup-blocked") {
+            alert("Popup bloqueado. Permita popups para este site e tente novamente.");
+            return;
+          }
+          if (codigo === "auth/popup-closed-by-user" || codigo === "auth/cancelled-popup-request") {
+            alert("Login cancelado.");
+            return;
           }
           alert(`Falha no login Google (${codigo}).`);
         }
