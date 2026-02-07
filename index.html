@@ -572,7 +572,6 @@
         campoNome.classList.toggle("hidden", rapido);
         campoDisciplina.classList.toggle("hidden", rapido);
         campoModoRapido.classList.toggle("hidden", !rapido);
-        painelTurma.classList.toggle("hidden", rapido);
         campoToggleObservacao.classList.toggle("hidden", rapido);
         if (rapido) {
           usarObservacao.checked = false;
@@ -627,6 +626,7 @@
       };
 
       const atualizarPainelCadastro = () => {
+        painelTurma.classList.toggle("hidden", painelCadastro.open);
         if (painelCadastro.open) {
           btnAbrirCadastro.textContent = "Fechar";
           return;
