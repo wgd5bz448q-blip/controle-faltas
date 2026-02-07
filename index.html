@@ -135,6 +135,12 @@
         font-size: 0.9rem;
       }
 
+      .status {
+        margin: 0 0 12px;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+
       .btn-danger {
         background: var(--danger);
         border: none;
@@ -216,6 +222,7 @@
       </header>
 
       <section class="card">
+        <p id="status-conexao" class="status">Conectando...</p>
         <div class="table-wrap">
           <div class="field" style="max-width: 520px; margin-bottom: 12px">
             <label>Disciplina exibida na tabela</label>
@@ -296,12 +303,16 @@
       </section>
     </main>
 
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="./firebase-config.js"></script>
     <script>
       const painelCadastro = document.getElementById("painel-cadastro");
       const resumoCadastro = document.getElementById("resumo-cadastro");
       const form = document.getElementById("faltas-form");
       const lista = document.getElementById("lista-faltas");
       const mensagemVazia = document.getElementById("mensagem-vazia");
+      const statusConexao = document.getElementById("status-conexao");
       const listaAlunos = document.getElementById("alunos-lista");
       const filtroDisciplina = document.getElementById("filtro-disciplina");
       const tituloTabela = document.getElementById("titulo-tabela");
@@ -311,12 +322,14 @@
 
       const STORAGE_KEY = "controle_faltas_registros_v1";
       const registros = [];
+      let usandoFirebase = false;
+      let db = null;
 
-      const salvarRegistros = () => {
+      const salvarRegistrosLocal = () => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(registros));
       };
 
-      const carregarRegistros = () => {
+      const carregarRegistrosLocal = () => {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return;
 
@@ -337,6 +350,10 @@
         } catch (_error) {
           localStorage.removeItem(STORAGE_KEY);
         }
+      };
+
+      const setStatusConexao = (texto) => {
+        statusConexao.textContent = texto;
       };
 
       const formatarData = (isoDate) => {
@@ -366,6 +383,11 @@
           return;
         }
         resumoCadastro.textContent = "Adicionar aluno";
+      };
+
+      const ajustarPainelPorDados = () => {
+        painelCadastro.open = registros.length === 0;
+        atualizarPainelCadastro();
       };
 
       const atualizarBotoesDisciplina = (botoes, valorAtivo) => {
@@ -402,14 +424,18 @@
               total: 0,
               ultimoRegistro: "",
               ultimoIndice: indice,
+              ultimoTimestamp: "",
               dias: [],
             });
           }
 
           const aluno = alunos.get(nomeNormalizado);
           aluno.total += faltaHoras;
-          aluno.ultimoRegistro = `${formatarData(registro.data)} (${faltaHoras}h)`;
-          aluno.ultimoIndice = indice;
+          if (!aluno.ultimoTimestamp || registro.data >= aluno.ultimoTimestamp) {
+            aluno.ultimoRegistro = `${formatarData(registro.data)} (${faltaHoras}h)`;
+            aluno.ultimoIndice = indice;
+            aluno.ultimoTimestamp = registro.data;
+          }
           aluno.dias.push({
             data: registro.data,
             horas: faltaHoras,
@@ -438,10 +464,43 @@
             </td>
           `;
           lista.appendChild(tr);
-          });
+        });
       };
 
-      form.addEventListener("submit", (event) => {
+      const carregarRegistrosFirebase = () => {
+        db.collection("faltas").onSnapshot(
+          (snapshot) => {
+            registros.length = 0;
+            snapshot.forEach((doc) => {
+              const item = doc.data() || {};
+              registros.push({
+                id: doc.id,
+                nome: String(item.nome || "").trim(),
+                disciplina: String(item.disciplina || ""),
+                data: String(item.data || ""),
+                falta: String(item.faltaHoras || item.falta || ""),
+                observacao: String(item.observacao || "").trim(),
+              });
+            });
+
+            atualizarListaAlunos();
+            atualizarTabela();
+            ajustarPainelPorDados();
+            setStatusConexao("Dados salvos na nuvem (Firebase).");
+          },
+          () => {
+            setStatusConexao("Falha ao sincronizar com Firebase. Usando armazenamento local.");
+            usandoFirebase = false;
+            registros.length = 0;
+            carregarRegistrosLocal();
+            atualizarListaAlunos();
+            atualizarTabela();
+            ajustarPainelPorDados();
+          }
+        );
+      };
+
+      form.addEventListener("submit", async (event) => {
         event.preventDefault();
 
         const dados = new FormData(form);
@@ -453,12 +512,32 @@
           observacao: String(dados.get("observacao")).trim(),
         };
 
-        registros.push(novoRegistro);
-        salvarRegistros();
-        atualizarListaAlunos();
+        if (!novoRegistro.nome || !novoRegistro.disciplina || !novoRegistro.data || !novoRegistro.falta) return;
+
+        if (usandoFirebase) {
+          try {
+            await db.collection("faltas").add({
+              nome: novoRegistro.nome,
+              nomeNormalizado: novoRegistro.nome.toLocaleLowerCase("pt-BR"),
+              disciplina: novoRegistro.disciplina,
+              data: novoRegistro.data,
+              faltaHoras: Number.parseInt(novoRegistro.falta, 10) || 0,
+              observacao: novoRegistro.observacao,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+          } catch (_error) {
+            alert("Nao foi possivel salvar no Firebase.");
+            return;
+          }
+        } else {
+          registros.push(novoRegistro);
+          salvarRegistrosLocal();
+          atualizarListaAlunos();
+          atualizarTabela();
+        }
+
         filtroDisciplina.value = novoRegistro.disciplina;
         atualizarBotoesDisciplina(botoesFiltroDisciplina, filtroDisciplina.value);
-        atualizarTabela();
         form.reset();
         disciplinaInput.value = filtroDisciplina.value;
         atualizarBotoesDisciplina(botoesDisciplinaForm, disciplinaInput.value);
@@ -483,7 +562,7 @@
 
       painelCadastro.addEventListener("toggle", atualizarPainelCadastro);
 
-      lista.addEventListener("click", (event) => {
+      lista.addEventListener("click", async (event) => {
         const alvo = event.target;
         if (!(alvo instanceof HTMLButtonElement)) return;
         const acao = alvo.dataset.action;
@@ -506,25 +585,76 @@
         if (!nome || !disciplina) return;
 
         const nomeNormalizado = nome.toLocaleLowerCase("pt-BR");
-        for (let i = registros.length - 1; i >= 0; i -= 1) {
-          const registro = registros[i];
-          if (registro.disciplina !== disciplina) continue;
-          if (registro.nome.trim().toLocaleLowerCase("pt-BR") !== nomeNormalizado) continue;
-          registros.splice(i, 1);
-        }
 
-        salvarRegistros();
-        atualizarListaAlunos();
-        atualizarTabela();
+        if (usandoFirebase) {
+          try {
+            const snapshot = await db.collection("faltas").where("disciplina", "==", disciplina).get();
+            const batch = db.batch();
+            snapshot.forEach((doc) => {
+              const item = doc.data() || {};
+              const nomeDoc = String(item.nome || "").trim().toLocaleLowerCase("pt-BR");
+              if (nomeDoc !== nomeNormalizado) return;
+              batch.delete(doc.ref);
+            });
+            await batch.commit();
+          } catch (_error) {
+            alert("Nao foi possivel remover aluno no Firebase.");
+            return;
+          }
+        } else {
+          for (let i = registros.length - 1; i >= 0; i -= 1) {
+            const registro = registros[i];
+            if (registro.disciplina !== disciplina) continue;
+            if (registro.nome.trim().toLocaleLowerCase("pt-BR") !== nomeNormalizado) continue;
+            registros.splice(i, 1);
+          }
+
+          salvarRegistrosLocal();
+          atualizarListaAlunos();
+          atualizarTabela();
+        }
       });
 
-      carregarRegistros();
-      atualizarListaAlunos();
-      painelCadastro.open = registros.length === 0;
-      atualizarPainelCadastro();
+      const iniciarArmazenamento = () => {
+        const firebaseConfig = window.FIREBASE_CONFIG || null;
+        const temConfigValida = Boolean(
+          firebaseConfig &&
+            firebaseConfig.apiKey &&
+            firebaseConfig.authDomain &&
+            firebaseConfig.projectId &&
+            firebaseConfig.appId
+        );
+
+        if (!temConfigValida || typeof firebase === "undefined") {
+          setStatusConexao("Usando armazenamento local. Configure FIREBASE_CONFIG para sincronizar na nuvem.");
+          carregarRegistrosLocal();
+          atualizarListaAlunos();
+          atualizarTabela();
+          ajustarPainelPorDados();
+          return;
+        }
+
+        try {
+          if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+          }
+          db = firebase.firestore();
+          usandoFirebase = true;
+          setStatusConexao("Conectando ao Firebase...");
+          carregarRegistrosFirebase();
+        } catch (_error) {
+          usandoFirebase = false;
+          setStatusConexao("Falha ao iniciar Firebase. Usando armazenamento local.");
+          carregarRegistrosLocal();
+          atualizarListaAlunos();
+          atualizarTabela();
+          ajustarPainelPorDados();
+        }
+      };
+
       atualizarBotoesDisciplina(botoesFiltroDisciplina, filtroDisciplina.value);
       atualizarBotoesDisciplina(botoesDisciplinaForm, disciplinaInput.value);
-      atualizarTabela();
+      iniciarArmazenamento();
     </script>
   </body>
 </html>
