@@ -195,19 +195,19 @@
       .auth-indicador {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
         padding: 10px 14px;
         border-radius: 999px;
-        background: #e7f7f3;
-        color: #0f766e;
         font-weight: 700;
       }
 
-      .auth-dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: #0f766e;
+      .auth-indicador.on {
+        background: #e7f7f3;
+        color: #0f766e;
+      }
+
+      .auth-indicador.off {
+        background: #eef2f7;
+        color: #475569;
       }
 
       .btn-danger {
@@ -324,10 +324,7 @@
           <p id="usuario-logado" class="status" style="margin: 0">Nao autenticado.</p>
           <div class="auth-actions">
             <button id="btn-abrir-cadastro" type="button" class="btn-secondary" title="Cadastro" aria-label="Cadastro">Cadastro</button>
-            <span id="auth-indicador" class="auth-indicador" style="display: none">
-              <span class="auth-dot"></span>
-              On
-            </span>
+            <span id="auth-indicador" class="auth-indicador off">Off</span>
             <button id="btn-login-google" type="button" title="Entrar com Google" aria-label="Entrar com Google">⌾</button>
             <button id="btn-logout" type="button" class="btn-secondary" style="display: none" title="Sair" aria-label="Sair">Sair</button>
           </div>
@@ -503,17 +500,21 @@
 
       const atualizarUIAutenticacao = (user) => {
         if (user) {
-          authIndicador.style.display = "inline-flex";
+          authIndicador.textContent = "On";
+          authIndicador.classList.remove("off");
+          authIndicador.classList.add("on");
           btnLoginGoogle.style.display = "none";
           btnLogout.style.display = "inline-flex";
           return;
         }
 
+        authIndicador.textContent = "Off";
+        authIndicador.classList.remove("on");
+        authIndicador.classList.add("off");
         btnLoginGoogle.textContent = "⌾";
         btnLoginGoogle.disabled = false;
         btnLoginGoogle.style.display = "inline-flex";
         btnLogout.style.display = "none";
-        authIndicador.style.display = "none";
       };
 
       const atualizarCampoObservacao = () => {
