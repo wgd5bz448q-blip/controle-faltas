@@ -323,13 +323,13 @@
         <div class="auth-bar">
           <p id="usuario-logado" class="status" style="margin: 0">Nao autenticado.</p>
           <div class="auth-actions">
-            <button id="btn-abrir-cadastro" type="button" class="btn-secondary" title="Cadastro" aria-label="Cadastro">＋</button>
+            <button id="btn-abrir-cadastro" type="button" class="btn-secondary" title="Cadastro" aria-label="Cadastro">Cadastro</button>
             <span id="auth-indicador" class="auth-indicador" style="display: none">
               <span class="auth-dot"></span>
               On
             </span>
             <button id="btn-login-google" type="button" title="Entrar com Google" aria-label="Entrar com Google">⌾</button>
-            <button id="btn-logout" type="button" class="btn-secondary" style="display: none" title="Sair" aria-label="Sair">↪</button>
+            <button id="btn-logout" type="button" class="btn-secondary" style="display: none" title="Sair" aria-label="Sair">Sair</button>
           </div>
         </div>
         <p id="status-conexao" class="status">Conectando...</p>
@@ -392,7 +392,7 @@
             </div>
 
             <div class="field full">
-              <button type="submit" title="Registrar falta" aria-label="Registrar falta">✅</button>
+              <button type="submit" title="Confirmar falta" aria-label="Confirmar falta">Confirmar falta</button>
             </div>
           </form>
         </details>
@@ -567,10 +567,10 @@
 
       const atualizarPainelCadastro = () => {
         if (painelCadastro.open) {
-          btnAbrirCadastro.textContent = "✖";
+          btnAbrirCadastro.textContent = "Fechar";
           return;
         }
-        btnAbrirCadastro.textContent = "＋";
+        btnAbrirCadastro.textContent = "Cadastro";
       };
 
       const ajustarPainelPorDados = () => {
