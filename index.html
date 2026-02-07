@@ -77,6 +77,21 @@
         display: none;
       }
 
+      .aluno-btn {
+        border: none;
+        background: transparent;
+        color: var(--text);
+        font-size: 1em;
+        font-weight: 700;
+        padding: 0;
+        cursor: pointer;
+        text-align: left;
+      }
+
+      .aluno-btn:hover {
+        color: var(--primary);
+      }
+
       label {
         font-size: 0.92rem;
         font-weight: 600;
@@ -376,6 +391,9 @@
       const authIndicador = document.getElementById("auth-indicador");
       const usarObservacao = document.getElementById("usar-observacao");
       const campoObservacao = document.getElementById("campo-observacao");
+      const nomeInput = document.getElementById("nome");
+      const dataInput = document.getElementById("data");
+      const faltaInput = document.getElementById("falta");
       const listaAlunos = document.getElementById("alunos-lista");
       const filtroDisciplina = document.getElementById("filtro-disciplina");
       const tituloTabela = document.getElementById("titulo-tabela");
@@ -452,6 +470,14 @@
       const formatarData = (isoDate) => {
         const [ano, mes, dia] = isoDate.split("-");
         return `${dia}/${mes}/${ano}`;
+      };
+
+      const dataHojeISO = () => {
+        const hoje = new Date();
+        const ano = hoje.getFullYear();
+        const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+        const dia = String(hoje.getDate()).padStart(2, "0");
+        return `${ano}-${mes}-${dia}`;
       };
 
       const escapeHtml = (texto) =>
@@ -548,7 +574,11 @@
             .join(" | ");
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td>${escapeHtml(aluno.nome)}</td>
+            <td>
+              <button class="aluno-btn" data-action="selecionar-aluno" data-nome="${escapeHtml(aluno.nome)}" type="button">
+                ${escapeHtml(aluno.nome)}
+              </button>
+            </td>
             <td>${aluno.total}h</td>
             <td>${aluno.ultimoRegistro}</td>
             <td>
@@ -666,6 +696,23 @@
         const alvo = event.target;
         if (!(alvo instanceof HTMLButtonElement)) return;
         const acao = alvo.dataset.action;
+
+        if (acao === "selecionar-aluno") {
+          const nome = (alvo.dataset.nome || "").trim();
+          if (!nome) return;
+
+          nomeInput.value = nome;
+          disciplinaInput.value = filtroDisciplina.value;
+          atualizarBotoesDisciplina(botoesDisciplinaForm, disciplinaInput.value);
+          dataInput.value = dataHojeISO();
+          faltaInput.value = "";
+          usarObservacao.checked = false;
+          atualizarCampoObservacao();
+          painelCadastro.open = true;
+          atualizarPainelCadastro();
+          faltaInput.focus();
+          return;
+        }
 
         if (acao === "ver-dias") {
           const nome = alvo.dataset.nome || "Aluno";
