@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Controle de Faltas</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <style>
       :root {
         --bg: #f4f6fb;
@@ -153,6 +154,25 @@
       .auth-actions {
         display: flex;
         gap: 8px;
+        align-items: center;
+      }
+
+      .auth-indicador {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: #e7f7f3;
+        color: #0f766e;
+        font-weight: 700;
+      }
+
+      .auth-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #0f766e;
       }
 
       .btn-danger {
@@ -239,8 +259,12 @@
         <div class="auth-bar">
           <p id="usuario-logado" class="status" style="margin: 0">Nao autenticado.</p>
           <div class="auth-actions">
+            <span id="auth-indicador" class="auth-indicador" style="display: none">
+              <span class="auth-dot"></span>
+              Logado
+            </span>
             <button id="btn-login-google" type="button">Entrar com Google</button>
-            <button id="btn-logout" type="button" class="btn-secondary">Sair</button>
+            <button id="btn-logout" type="button" class="btn-secondary" style="display: none">Sair</button>
           </div>
         </div>
         <p id="status-conexao" class="status">Conectando...</p>
@@ -338,6 +362,7 @@
       const usuarioLogado = document.getElementById("usuario-logado");
       const btnLoginGoogle = document.getElementById("btn-login-google");
       const btnLogout = document.getElementById("btn-logout");
+      const authIndicador = document.getElementById("auth-indicador");
       const listaAlunos = document.getElementById("alunos-lista");
       const filtroDisciplina = document.getElementById("filtro-disciplina");
       const tituloTabela = document.getElementById("titulo-tabela");
@@ -385,6 +410,21 @@
 
       const setUsuario = (texto) => {
         usuarioLogado.textContent = texto;
+      };
+
+      const atualizarUIAutenticacao = (user) => {
+        if (user) {
+          authIndicador.style.display = "inline-flex";
+          btnLoginGoogle.style.display = "none";
+          btnLogout.style.display = "inline-flex";
+          return;
+        }
+
+        btnLoginGoogle.textContent = "Entrar com Google";
+        btnLoginGoogle.disabled = false;
+        btnLoginGoogle.style.display = "inline-flex";
+        btnLogout.style.display = "none";
+        authIndicador.style.display = "none";
       };
 
       const formatarData = (isoDate) => {
@@ -685,12 +725,14 @@
           auth.onAuthStateChanged((user) => {
             if (user) {
               setUsuario(`Logado: ${user.email || user.displayName || "Usuario"}`);
+              atualizarUIAutenticacao(user);
               setStatusConexao("Conectando ao Firebase...");
               carregarRegistrosFirebase();
               return;
             }
 
             setUsuario("Nao autenticado.");
+            atualizarUIAutenticacao(null);
             setStatusConexao("Faca login para sincronizar na nuvem.");
             if (unsubscribeRegistros) {
               unsubscribeRegistros();
@@ -705,6 +747,7 @@
         } catch (_error) {
           usandoFirebase = false;
           setStatusConexao("Falha ao iniciar Firebase. Usando armazenamento local.");
+          atualizarUIAutenticacao(null);
           carregarRegistrosLocal();
           atualizarListaAlunos();
           atualizarTabela();
@@ -752,6 +795,7 @@
 
       atualizarBotoesDisciplina(botoesFiltroDisciplina, filtroDisciplina.value);
       atualizarBotoesDisciplina(botoesDisciplinaForm, disciplinaInput.value);
+      atualizarUIAutenticacao(null);
       iniciarArmazenamento();
     </script>
   </body>
