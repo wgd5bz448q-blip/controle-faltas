@@ -722,28 +722,35 @@
           db = firebase.firestore();
           usandoFirebase = true;
 
-          auth.onAuthStateChanged((user) => {
-            if (user) {
-              setUsuario(`Logado: ${user.email || user.displayName || "Usuario"}`);
-              atualizarUIAutenticacao(user);
-              setStatusConexao("Conectando ao Firebase...");
-              carregarRegistrosFirebase();
-              return;
-            }
+          auth
+            .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+            .then(() => {
+              auth.onAuthStateChanged((user) => {
+                if (user) {
+                  setUsuario(`Logado: ${user.email || user.displayName || "Usuario"}`);
+                  atualizarUIAutenticacao(user);
+                  setStatusConexao("Conectando ao Firebase...");
+                  carregarRegistrosFirebase();
+                  return;
+                }
 
-            setUsuario("Nao autenticado.");
-            atualizarUIAutenticacao(null);
-            setStatusConexao("Faca login para sincronizar na nuvem.");
-            if (unsubscribeRegistros) {
-              unsubscribeRegistros();
-              unsubscribeRegistros = null;
-            }
-            registros.length = 0;
-            carregarRegistrosLocal();
-            atualizarListaAlunos();
-            atualizarTabela();
-            ajustarPainelPorDados();
-          });
+                setUsuario("Nao autenticado.");
+                atualizarUIAutenticacao(null);
+                setStatusConexao("Faca login para sincronizar na nuvem.");
+                if (unsubscribeRegistros) {
+                  unsubscribeRegistros();
+                  unsubscribeRegistros = null;
+                }
+                registros.length = 0;
+                carregarRegistrosLocal();
+                atualizarListaAlunos();
+                atualizarTabela();
+                ajustarPainelPorDados();
+              });
+            })
+            .catch(() => {
+              setStatusConexao("Nao foi possivel manter sessao. Tente login novamente.");
+            });
         } catch (_error) {
           usandoFirebase = false;
           setStatusConexao("Falha ao iniciar Firebase. Usando armazenamento local.");
