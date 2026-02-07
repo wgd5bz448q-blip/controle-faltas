@@ -73,6 +73,10 @@
         grid-column: 1 / -1;
       }
 
+      .hidden {
+        display: none;
+      }
+
       label {
         font-size: 0.92rem;
         font-weight: 600;
@@ -336,6 +340,13 @@
             </div>
 
             <div class="field">
+              <label style="font-weight: 600; cursor: pointer">
+                <input id="usar-observacao" type="checkbox" style="height: auto; margin-right: 8px" />
+                Adicionar observacao deste dia
+              </label>
+            </div>
+
+            <div id="campo-observacao" class="field hidden">
               <label for="observacao">Observação (opcional)</label>
               <input id="observacao" name="observacao" type="text" placeholder="Ex.: atestado pendente" />
             </div>
@@ -363,6 +374,8 @@
       const btnLoginGoogle = document.getElementById("btn-login-google");
       const btnLogout = document.getElementById("btn-logout");
       const authIndicador = document.getElementById("auth-indicador");
+      const usarObservacao = document.getElementById("usar-observacao");
+      const campoObservacao = document.getElementById("campo-observacao");
       const listaAlunos = document.getElementById("alunos-lista");
       const filtroDisciplina = document.getElementById("filtro-disciplina");
       const tituloTabela = document.getElementById("titulo-tabela");
@@ -425,6 +438,15 @@
         btnLoginGoogle.style.display = "inline-flex";
         btnLogout.style.display = "none";
         authIndicador.style.display = "none";
+      };
+
+      const atualizarCampoObservacao = () => {
+        const ativo = Boolean(usarObservacao.checked);
+        campoObservacao.classList.toggle("hidden", !ativo);
+        if (!ativo) {
+          const inputObservacao = document.getElementById("observacao");
+          inputObservacao.value = "";
+        }
       };
 
       const formatarData = (isoDate) => {
@@ -615,6 +637,8 @@
         filtroDisciplina.value = novoRegistro.disciplina;
         atualizarBotoesDisciplina(botoesFiltroDisciplina, filtroDisciplina.value);
         form.reset();
+        usarObservacao.checked = false;
+        atualizarCampoObservacao();
         disciplinaInput.value = filtroDisciplina.value;
         atualizarBotoesDisciplina(botoesDisciplinaForm, disciplinaInput.value);
         painelCadastro.open = false;
@@ -800,9 +824,12 @@
         }
       });
 
+      usarObservacao.addEventListener("change", atualizarCampoObservacao);
+
       atualizarBotoesDisciplina(botoesFiltroDisciplina, filtroDisciplina.value);
       atualizarBotoesDisciplina(botoesDisciplinaForm, disciplinaInput.value);
       atualizarUIAutenticacao(null);
+      atualizarCampoObservacao();
       iniciarArmazenamento();
     </script>
   </body>
