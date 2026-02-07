@@ -315,7 +315,6 @@
             <div id="campo-modo-rapido" class="field full hidden">
               <div class="modo-rapido">
                 <p id="aluno-selecionado-rapido"></p>
-                <button id="btn-cadastro-completo" class="btn-secondary" type="button">Cadastro completo</button>
               </div>
             </div>
 
@@ -425,7 +424,6 @@
       const campoDisciplina = document.getElementById("campo-disciplina");
       const campoModoRapido = document.getElementById("campo-modo-rapido");
       const alunoSelecionadoRapido = document.getElementById("aluno-selecionado-rapido");
-      const btnCadastroCompleto = document.getElementById("btn-cadastro-completo");
       const nomeInput = document.getElementById("nome");
       const dataInput = document.getElementById("data");
       const faltaInput = document.getElementById("falta");
@@ -628,6 +626,7 @@
             <td>${aluno.total}h</td>
             <td>${aluno.ultimoRegistro}</td>
             <td>
+              <button class="btn-secondary" data-action="abrir-cadastro-completo" data-nome="${escapeHtml(aluno.nome)}" data-disciplina="${escapeHtml(disciplinaSelecionada)}" type="button">Cadastro completo</button>
               <button class="btn-secondary" data-action="ver-dias" data-nome="${escapeHtml(aluno.nome)}" data-historico="${escapeHtml(historico)}" type="button">Ver dias</button>
               <button class="btn-danger" data-action="remover-aluno" data-nome="${escapeHtml(aluno.nome)}" data-disciplina="${escapeHtml(disciplinaSelecionada)}" type="button">Remover aluno</button>
             </td>
@@ -760,6 +759,25 @@
           painelCadastro.open = true;
           atualizarPainelCadastro();
           faltaInput.focus();
+          return;
+        }
+
+        if (acao === "abrir-cadastro-completo") {
+          const nome = (alvo.dataset.nome || "").trim();
+          const disciplina = (alvo.dataset.disciplina || "").trim();
+          if (!nome || !disciplina) return;
+
+          atualizarModoLancamento(false);
+          nomeInput.value = nome;
+          disciplinaInput.value = disciplina;
+          atualizarBotoesDisciplina(botoesDisciplinaForm, disciplinaInput.value);
+          preencherDataComHoje();
+          faltaInput.value = "";
+          usarObservacao.checked = false;
+          atualizarCampoObservacao();
+          painelCadastro.open = true;
+          atualizarPainelCadastro();
+          dataInput.focus();
           return;
         }
 
@@ -923,11 +941,6 @@
       btnAbrirCadastro.addEventListener("click", () => {
         painelCadastro.open = !painelCadastro.open;
         atualizarPainelCadastro();
-      });
-
-      btnCadastroCompleto.addEventListener("click", () => {
-        atualizarModoLancamento(false);
-        nomeInput.focus();
       });
 
       usarObservacao.addEventListener("change", atualizarCampoObservacao);
