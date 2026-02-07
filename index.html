@@ -515,6 +515,10 @@
         return `${ano}-${mes}-${dia}`;
       };
 
+      const preencherDataComHoje = () => {
+        dataInput.value = dataHojeISO();
+      };
+
       const escapeHtml = (texto) =>
         texto
           .replaceAll("&", "&amp;")
@@ -703,6 +707,7 @@
         atualizarBotoesDisciplina(botoesFiltroDisciplina, filtroDisciplina.value);
         form.reset();
         atualizarModoLancamento(false);
+        preencherDataComHoje();
         usarObservacao.checked = false;
         atualizarCampoObservacao();
         disciplinaInput.value = filtroDisciplina.value;
@@ -740,7 +745,7 @@
           nomeInput.value = nome;
           disciplinaInput.value = filtroDisciplina.value;
           atualizarBotoesDisciplina(botoesDisciplinaForm, disciplinaInput.value);
-          dataInput.value = dataHojeISO();
+          preencherDataComHoje();
           faltaInput.value = "";
           usarObservacao.checked = false;
           atualizarCampoObservacao();
@@ -919,6 +924,7 @@
       atualizarBotoesDisciplina(botoesDisciplinaForm, disciplinaInput.value);
       atualizarUIAutenticacao(null);
       atualizarModoLancamento(false);
+      preencherDataComHoje();
       atualizarCampoObservacao();
       iniciarArmazenamento();
     </script>
