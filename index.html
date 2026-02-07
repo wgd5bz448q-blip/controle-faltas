@@ -141,6 +141,20 @@
         color: var(--muted);
       }
 
+      .auth-bar {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+      }
+
+      .auth-actions {
+        display: flex;
+        gap: 8px;
+      }
+
       .btn-danger {
         background: var(--danger);
         border: none;
@@ -222,6 +236,13 @@
       </header>
 
       <section class="card">
+        <div class="auth-bar">
+          <p id="usuario-logado" class="status" style="margin: 0">Nao autenticado.</p>
+          <div class="auth-actions">
+            <button id="btn-login-google" type="button">Entrar com Google</button>
+            <button id="btn-logout" type="button" class="btn-secondary">Sair</button>
+          </div>
+        </div>
         <p id="status-conexao" class="status">Conectando...</p>
         <div class="table-wrap">
           <div class="field" style="max-width: 520px; margin-bottom: 12px">
@@ -304,6 +325,7 @@
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="./firebase-config.js"></script>
     <script>
@@ -313,6 +335,9 @@
       const lista = document.getElementById("lista-faltas");
       const mensagemVazia = document.getElementById("mensagem-vazia");
       const statusConexao = document.getElementById("status-conexao");
+      const usuarioLogado = document.getElementById("usuario-logado");
+      const btnLoginGoogle = document.getElementById("btn-login-google");
+      const btnLogout = document.getElementById("btn-logout");
       const listaAlunos = document.getElementById("alunos-lista");
       const filtroDisciplina = document.getElementById("filtro-disciplina");
       const tituloTabela = document.getElementById("titulo-tabela");
@@ -324,6 +349,8 @@
       const registros = [];
       let usandoFirebase = false;
       let db = null;
+      let auth = null;
+      let unsubscribeRegistros = null;
 
       const salvarRegistrosLocal = () => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(registros));
@@ -354,6 +381,10 @@
 
       const setStatusConexao = (texto) => {
         statusConexao.textContent = texto;
+      };
+
+      const setUsuario = (texto) => {
+        usuarioLogado.textContent = texto;
       };
 
       const formatarData = (isoDate) => {
@@ -468,7 +499,8 @@
       };
 
       const carregarRegistrosFirebase = () => {
-        db.collection("faltas").onSnapshot(
+        if (unsubscribeRegistros) unsubscribeRegistros();
+        unsubscribeRegistros = db.collection("faltas").onSnapshot(
           (snapshot) => {
             registros.length = 0;
             snapshot.forEach((doc) => {
@@ -515,6 +547,10 @@
         if (!novoRegistro.nome || !novoRegistro.disciplina || !novoRegistro.data || !novoRegistro.falta) return;
 
         if (usandoFirebase) {
+          if (!auth.currentUser) {
+            alert("Faca login para salvar na nuvem.");
+            return;
+          }
           try {
             await db.collection("faltas").add({
               nome: novoRegistro.nome,
@@ -587,6 +623,10 @@
         const nomeNormalizado = nome.toLocaleLowerCase("pt-BR");
 
         if (usandoFirebase) {
+          if (!auth.currentUser) {
+            alert("Faca login para remover na nuvem.");
+            return;
+          }
           try {
             const snapshot = await db.collection("faltas").where("disciplina", "==", disciplina).get();
             const batch = db.batch();
@@ -638,10 +678,30 @@
           if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
           }
+          auth = firebase.auth();
           db = firebase.firestore();
           usandoFirebase = true;
-          setStatusConexao("Conectando ao Firebase...");
-          carregarRegistrosFirebase();
+
+          auth.onAuthStateChanged((user) => {
+            if (user) {
+              setUsuario(`Logado: ${user.email || user.displayName || "Usuario"}`);
+              setStatusConexao("Conectando ao Firebase...");
+              carregarRegistrosFirebase();
+              return;
+            }
+
+            setUsuario("Nao autenticado.");
+            setStatusConexao("Faca login para sincronizar na nuvem.");
+            if (unsubscribeRegistros) {
+              unsubscribeRegistros();
+              unsubscribeRegistros = null;
+            }
+            registros.length = 0;
+            carregarRegistrosLocal();
+            atualizarListaAlunos();
+            atualizarTabela();
+            ajustarPainelPorDados();
+          });
         } catch (_error) {
           usandoFirebase = false;
           setStatusConexao("Falha ao iniciar Firebase. Usando armazenamento local.");
@@ -651,6 +711,28 @@
           ajustarPainelPorDados();
         }
       };
+
+      btnLoginGoogle.addEventListener("click", async () => {
+        if (!usandoFirebase || !auth) {
+          alert("Firebase nao configurado.");
+          return;
+        }
+        const provider = new firebase.auth.GoogleAuthProvider();
+        try {
+          await auth.signInWithPopup(provider);
+        } catch (_error) {
+          alert("Nao foi possivel fazer login com Google.");
+        }
+      });
+
+      btnLogout.addEventListener("click", async () => {
+        if (!usandoFirebase || !auth) return;
+        try {
+          await auth.signOut();
+        } catch (_error) {
+          alert("Nao foi possivel sair.");
+        }
+      });
 
       atualizarBotoesDisciplina(botoesFiltroDisciplina, filtroDisciplina.value);
       atualizarBotoesDisciplina(botoesDisciplinaForm, disciplinaInput.value);
