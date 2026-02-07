@@ -231,6 +231,31 @@
         margin-right: 6px;
       }
 
+      .acoes-btn {
+        width: 42px;
+        height: 42px;
+        padding: 0;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #fff;
+        color: #334155;
+        font-size: 1.15rem;
+        line-height: 1;
+      }
+
+      .acoes-btn:hover {
+        background: #f8fafc;
+      }
+
+      .acoes-btn.danger {
+        color: var(--danger);
+        border-color: #fecaca;
+      }
+
+      .acoes-btn.danger:hover {
+        background: #fef2f2;
+      }
+
       .cadastro-detalhes {
         margin-top: 16px;
         border-top: 1px solid var(--border);
@@ -626,9 +651,9 @@
             <td>${aluno.total}h</td>
             <td>${aluno.ultimoRegistro}</td>
             <td>
-              <button class="btn-secondary" data-action="abrir-cadastro-completo" data-nome="${escapeHtml(aluno.nome)}" data-disciplina="${escapeHtml(disciplinaSelecionada)}" type="button" title="Cadastro completo" aria-label="Cadastro completo">⚙</button>
-              <button class="btn-secondary" data-action="ver-dias" data-nome="${escapeHtml(aluno.nome)}" data-historico="${escapeHtml(historico)}" type="button" title="Ver dias" aria-label="Ver dias">📅</button>
-              <button class="btn-danger" data-action="remover-aluno" data-nome="${escapeHtml(aluno.nome)}" data-disciplina="${escapeHtml(disciplinaSelecionada)}" type="button" title="Remover aluno" aria-label="Remover aluno">🗑️</button>
+              <button class="acoes-btn" data-action="abrir-cadastro-completo" data-nome="${escapeHtml(aluno.nome)}" data-disciplina="${escapeHtml(disciplinaSelecionada)}" type="button" title="Cadastro completo" aria-label="Cadastro completo">⚙</button>
+              <button class="acoes-btn" data-action="ver-dias" data-nome="${escapeHtml(aluno.nome)}" data-historico="${escapeHtml(historico)}" type="button" title="Ver dias" aria-label="Ver dias">📅</button>
+              <button class="acoes-btn danger" data-action="remover-aluno" data-nome="${escapeHtml(aluno.nome)}" data-disciplina="${escapeHtml(disciplinaSelecionada)}" type="button" title="Remover aluno" aria-label="Remover aluno">🗑️</button>
             </td>
           `;
           lista.appendChild(tr);
