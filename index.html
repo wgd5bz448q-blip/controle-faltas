@@ -1024,7 +1024,13 @@
       });
 
       btnVoltarTurma.addEventListener("click", () => {
+        form.reset();
         atualizarModoLancamento(false);
+        preencherDataComHoje();
+        usarObservacao.checked = false;
+        atualizarCampoObservacao();
+        painelCadastro.open = false;
+        atualizarPainelCadastro();
       });
 
       btnCadastrarAluno.addEventListener("click", async () => {
