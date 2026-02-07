@@ -354,6 +354,9 @@
             <div id="campo-modo-rapido" class="field full hidden">
               <div class="modo-rapido">
                 <p id="aluno-selecionado-rapido"></p>
+                <button id="btn-voltar-turma" type="button" class="btn-secondary" title="Voltar para turma" aria-label="Voltar para turma">
+                  Voltar para turma
+                </button>
               </div>
             </div>
 
@@ -469,6 +472,7 @@
       const campoNome = document.getElementById("campo-nome");
       const campoDisciplina = document.getElementById("campo-disciplina");
       const campoModoRapido = document.getElementById("campo-modo-rapido");
+      const btnVoltarTurma = document.getElementById("btn-voltar-turma");
       const painelTurma = document.getElementById("painel-turma");
       const acoesCadastro = document.getElementById("acoes-cadastro");
       const alunoSelecionadoRapido = document.getElementById("aluno-selecionado-rapido");
@@ -1017,6 +1021,10 @@
           nomeInput.focus();
         }
         atualizarPainelCadastro();
+      });
+
+      btnVoltarTurma.addEventListener("click", () => {
+        atualizarModoLancamento(false);
       });
 
       btnCadastrarAluno.addEventListener("click", async () => {
