@@ -298,13 +298,13 @@
         <div class="auth-bar">
           <p id="usuario-logado" class="status" style="margin: 0">Nao autenticado.</p>
           <div class="auth-actions">
-            <button id="btn-abrir-cadastro" type="button" class="btn-secondary">Cadastro</button>
+            <button id="btn-abrir-cadastro" type="button" class="btn-secondary" title="Cadastro" aria-label="Cadastro">📝</button>
             <span id="auth-indicador" class="auth-indicador" style="display: none">
               <span class="auth-dot"></span>
               On
             </span>
-            <button id="btn-login-google" type="button">Entrar com Google</button>
-            <button id="btn-logout" type="button" class="btn-secondary" style="display: none">Sair</button>
+            <button id="btn-login-google" type="button" title="Entrar com Google" aria-label="Entrar com Google">🔐G</button>
+            <button id="btn-logout" type="button" class="btn-secondary" style="display: none" title="Sair" aria-label="Sair">⎋</button>
           </div>
         </div>
         <p id="status-conexao" class="status">Conectando...</p>
@@ -367,7 +367,7 @@
             </div>
 
             <div class="field full">
-              <button type="submit">Registrar Falta</button>
+              <button type="submit" title="Registrar falta" aria-label="Registrar falta">✅</button>
             </div>
           </form>
         </details>
@@ -484,7 +484,7 @@
           return;
         }
 
-        btnLoginGoogle.textContent = "Entrar com Google";
+        btnLoginGoogle.textContent = "🔐G";
         btnLoginGoogle.disabled = false;
         btnLoginGoogle.style.display = "inline-flex";
         btnLogout.style.display = "none";
@@ -542,10 +542,10 @@
 
       const atualizarPainelCadastro = () => {
         if (painelCadastro.open) {
-          btnAbrirCadastro.textContent = "Fechar cadastro";
+          btnAbrirCadastro.textContent = "✖";
           return;
         }
-        btnAbrirCadastro.textContent = "Cadastro";
+        btnAbrirCadastro.textContent = "📝";
       };
 
       const ajustarPainelPorDados = () => {
@@ -626,9 +626,9 @@
             <td>${aluno.total}h</td>
             <td>${aluno.ultimoRegistro}</td>
             <td>
-              <button class="btn-secondary" data-action="abrir-cadastro-completo" data-nome="${escapeHtml(aluno.nome)}" data-disciplina="${escapeHtml(disciplinaSelecionada)}" type="button">Cadastro completo</button>
-              <button class="btn-secondary" data-action="ver-dias" data-nome="${escapeHtml(aluno.nome)}" data-historico="${escapeHtml(historico)}" type="button">Ver dias</button>
-              <button class="btn-danger" data-action="remover-aluno" data-nome="${escapeHtml(aluno.nome)}" data-disciplina="${escapeHtml(disciplinaSelecionada)}" type="button">Remover aluno</button>
+              <button class="btn-secondary" data-action="abrir-cadastro-completo" data-nome="${escapeHtml(aluno.nome)}" data-disciplina="${escapeHtml(disciplinaSelecionada)}" type="button" title="Cadastro completo" aria-label="Cadastro completo">👤⚙️</button>
+              <button class="btn-secondary" data-action="ver-dias" data-nome="${escapeHtml(aluno.nome)}" data-historico="${escapeHtml(historico)}" type="button" title="Ver dias" aria-label="Ver dias">📅</button>
+              <button class="btn-danger" data-action="remover-aluno" data-nome="${escapeHtml(aluno.nome)}" data-disciplina="${escapeHtml(disciplinaSelecionada)}" type="button" title="Remover aluno" aria-label="Remover aluno">🗑️</button>
             </td>
           `;
           lista.appendChild(tr);
