@@ -77,6 +77,22 @@
         display: none;
       }
 
+      .modo-rapido {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        background: #eef6ff;
+        border: 1px solid #cfe2ff;
+        border-radius: 10px;
+        padding: 10px 12px;
+      }
+
+      .modo-rapido p {
+        margin: 0;
+        font-weight: 600;
+      }
+
       .aluno-btn {
         border: none;
         background: transparent;
@@ -318,13 +334,20 @@
         <details id="painel-cadastro" class="cadastro-detalhes">
           <summary id="resumo-cadastro">Adicionar aluno</summary>
           <form id="faltas-form" class="form-grid">
-            <div class="field full">
+            <div id="campo-modo-rapido" class="field full hidden">
+              <div class="modo-rapido">
+                <p id="aluno-selecionado-rapido"></p>
+                <button id="btn-cadastro-completo" class="btn-secondary" type="button">Cadastro completo</button>
+              </div>
+            </div>
+
+            <div id="campo-nome" class="field full">
               <label for="nome">Nome do aluno</label>
               <input id="nome" name="nome" type="text" placeholder="Ex.: Maria Oliveira" list="alunos-lista" required />
               <datalist id="alunos-lista"></datalist>
             </div>
 
-            <div class="field">
+            <div id="campo-disciplina" class="field">
               <label>Disciplina</label>
               <div class="disciplina-tabs" id="disciplina-form-tabs">
                 <button class="tab-btn" type="button" data-role="disciplina-form-btn" data-value="Semiologia Clínica 1">
@@ -391,6 +414,11 @@
       const authIndicador = document.getElementById("auth-indicador");
       const usarObservacao = document.getElementById("usar-observacao");
       const campoObservacao = document.getElementById("campo-observacao");
+      const campoNome = document.getElementById("campo-nome");
+      const campoDisciplina = document.getElementById("campo-disciplina");
+      const campoModoRapido = document.getElementById("campo-modo-rapido");
+      const alunoSelecionadoRapido = document.getElementById("aluno-selecionado-rapido");
+      const btnCadastroCompleto = document.getElementById("btn-cadastro-completo");
       const nomeInput = document.getElementById("nome");
       const dataInput = document.getElementById("data");
       const faltaInput = document.getElementById("falta");
@@ -465,6 +493,13 @@
           const inputObservacao = document.getElementById("observacao");
           inputObservacao.value = "";
         }
+      };
+
+      const atualizarModoLancamento = (rapido, nome = "") => {
+        campoNome.classList.toggle("hidden", rapido);
+        campoDisciplina.classList.toggle("hidden", rapido);
+        campoModoRapido.classList.toggle("hidden", !rapido);
+        alunoSelecionadoRapido.textContent = rapido ? `Aluno selecionado: ${nome}` : "";
       };
 
       const formatarData = (isoDate) => {
@@ -667,6 +702,7 @@
         filtroDisciplina.value = novoRegistro.disciplina;
         atualizarBotoesDisciplina(botoesFiltroDisciplina, filtroDisciplina.value);
         form.reset();
+        atualizarModoLancamento(false);
         usarObservacao.checked = false;
         atualizarCampoObservacao();
         disciplinaInput.value = filtroDisciplina.value;
@@ -708,6 +744,7 @@
           faltaInput.value = "";
           usarObservacao.checked = false;
           atualizarCampoObservacao();
+          atualizarModoLancamento(true, nome);
           painelCadastro.open = true;
           atualizarPainelCadastro();
           faltaInput.focus();
@@ -871,11 +908,17 @@
         }
       });
 
+      btnCadastroCompleto.addEventListener("click", () => {
+        atualizarModoLancamento(false);
+        nomeInput.focus();
+      });
+
       usarObservacao.addEventListener("change", atualizarCampoObservacao);
 
       atualizarBotoesDisciplina(botoesFiltroDisciplina, filtroDisciplina.value);
       atualizarBotoesDisciplina(botoesDisciplinaForm, disciplinaInput.value);
       atualizarUIAutenticacao(null);
+      atualizarModoLancamento(false);
       atualizarCampoObservacao();
       iniciarArmazenamento();
     </script>
