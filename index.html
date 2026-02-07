@@ -206,8 +206,8 @@
       }
 
       .auth-indicador.off {
-        background: #eef2f7;
-        color: #475569;
+        background: #fef2f2;
+        color: #b91c1c;
       }
 
       .btn-danger {
@@ -966,6 +966,16 @@
 
       btnAbrirCadastro.addEventListener("click", () => {
         painelCadastro.open = !painelCadastro.open;
+        if (painelCadastro.open) {
+          form.reset();
+          atualizarModoLancamento(false);
+          preencherDataComHoje();
+          usarObservacao.checked = false;
+          atualizarCampoObservacao();
+          disciplinaInput.value = filtroDisciplina.value;
+          atualizarBotoesDisciplina(botoesDisciplinaForm, disciplinaInput.value);
+          nomeInput.focus();
+        }
         atualizarPainelCadastro();
       });
 
