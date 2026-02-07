@@ -249,6 +249,10 @@
         display: none;
       }
 
+      .cadastro-detalhes summary.resumo-oculto {
+        display: none;
+      }
+
       .disciplina-tabs {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -294,45 +298,19 @@
         <div class="auth-bar">
           <p id="usuario-logado" class="status" style="margin: 0">Nao autenticado.</p>
           <div class="auth-actions">
+            <button id="btn-abrir-cadastro" type="button" class="btn-secondary">Cadastro</button>
             <span id="auth-indicador" class="auth-indicador" style="display: none">
               <span class="auth-dot"></span>
-              Logado
+              On
             </span>
             <button id="btn-login-google" type="button">Entrar com Google</button>
             <button id="btn-logout" type="button" class="btn-secondary" style="display: none">Sair</button>
           </div>
         </div>
         <p id="status-conexao" class="status">Conectando...</p>
-        <div class="table-wrap">
-          <div class="field" style="max-width: 520px; margin-bottom: 12px">
-            <label>Disciplina exibida na tabela</label>
-            <div class="disciplina-tabs" id="filtro-disciplina-tabs">
-              <button class="tab-btn" type="button" data-role="filtro-disciplina-btn" data-value="Semiologia Clínica 1">
-                Semiologia Clínica 1
-              </button>
-              <button class="tab-btn" type="button" data-role="filtro-disciplina-btn" data-value="Semiologia Clínica 2">
-                Semiologia Clínica 2
-              </button>
-            </div>
-            <input id="filtro-disciplina" name="filtro-disciplina" type="hidden" value="Semiologia Clínica 1" />
-          </div>
-          <p id="titulo-tabela" style="margin: 0 0 8px; font-weight: 700"></p>
-          <table aria-label="Registros de faltas">
-            <thead>
-              <tr>
-                <th>Aluno</th>
-                <th>Total</th>
-                <th>Última falta</th>
-                <th>Ação</th>
-              </tr>
-            </thead>
-            <tbody id="lista-faltas"></tbody>
-          </table>
-          <p id="mensagem-vazia" class="empty">Nenhuma falta registrada ainda.</p>
-        </div>
 
         <details id="painel-cadastro" class="cadastro-detalhes">
-          <summary id="resumo-cadastro">Adicionar aluno</summary>
+          <summary id="resumo-cadastro" class="resumo-oculto">Cadastro</summary>
           <form id="faltas-form" class="form-grid">
             <div id="campo-modo-rapido" class="field full hidden">
               <div class="modo-rapido">
@@ -394,6 +372,34 @@
             </div>
           </form>
         </details>
+
+        <div class="table-wrap">
+          <div class="field" style="max-width: 520px; margin-bottom: 12px">
+            <label>Disciplina exibida na tabela</label>
+            <div class="disciplina-tabs" id="filtro-disciplina-tabs">
+              <button class="tab-btn" type="button" data-role="filtro-disciplina-btn" data-value="Semiologia Clínica 1">
+                Semiologia Clínica 1
+              </button>
+              <button class="tab-btn" type="button" data-role="filtro-disciplina-btn" data-value="Semiologia Clínica 2">
+                Semiologia Clínica 2
+              </button>
+            </div>
+            <input id="filtro-disciplina" name="filtro-disciplina" type="hidden" value="Semiologia Clínica 1" />
+          </div>
+          <p id="titulo-tabela" style="margin: 0 0 8px; font-weight: 700"></p>
+          <table aria-label="Registros de faltas">
+            <thead>
+              <tr>
+                <th>Aluno</th>
+                <th>Total</th>
+                <th>Última falta</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="lista-faltas"></tbody>
+          </table>
+          <p id="mensagem-vazia" class="empty">Nenhuma falta registrada ainda.</p>
+        </div>
       </section>
     </main>
 
@@ -411,6 +417,7 @@
       const usuarioLogado = document.getElementById("usuario-logado");
       const btnLoginGoogle = document.getElementById("btn-login-google");
       const btnLogout = document.getElementById("btn-logout");
+      const btnAbrirCadastro = document.getElementById("btn-abrir-cadastro");
       const authIndicador = document.getElementById("auth-indicador");
       const usarObservacao = document.getElementById("usar-observacao");
       const campoObservacao = document.getElementById("campo-observacao");
@@ -537,10 +544,10 @@
 
       const atualizarPainelCadastro = () => {
         if (painelCadastro.open) {
-          resumoCadastro.textContent = "Esconder cadastro";
+          btnAbrirCadastro.textContent = "Fechar cadastro";
           return;
         }
-        resumoCadastro.textContent = "Adicionar aluno";
+        btnAbrirCadastro.textContent = "Cadastro";
       };
 
       const ajustarPainelPorDados = () => {
@@ -911,6 +918,11 @@
         } catch (_error) {
           alert("Nao foi possivel sair.");
         }
+      });
+
+      btnAbrirCadastro.addEventListener("click", () => {
+        painelCadastro.open = !painelCadastro.open;
+        atualizarPainelCadastro();
       });
 
       btnCadastroCompleto.addEventListener("click", () => {
