@@ -179,17 +179,17 @@
 
       .auth-bar {
         display: flex;
-        gap: 10px;
+        gap: 12px;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 10px;
-        flex-wrap: wrap;
+        margin-bottom: 8px;
       }
 
       .auth-actions {
         display: flex;
         gap: 14px;
         align-items: center;
+        margin-left: auto;
       }
 
       .auth-indicador {
@@ -227,6 +227,18 @@
       #btn-login-google:hover {
         background: transparent;
         color: #0f766e;
+      }
+
+      .section-divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 10px 0 12px;
+      }
+
+      .cadastro-toolbar {
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 8px;
       }
 
       .btn-danger {
@@ -357,6 +369,10 @@
         .disciplina-tabs {
           grid-template-columns: 1fr;
         }
+
+        .auth-actions {
+          gap: 12px;
+        }
       }
     </style>
   </head>
@@ -369,15 +385,18 @@
 
       <section class="card">
         <div class="auth-bar">
-          <p id="usuario-logado" class="status" style="margin: 0">Nao autenticado.</p>
+          <span id="auth-indicador" class="auth-indicador off">Off</span>
           <div class="auth-actions">
-            <button id="btn-abrir-cadastro" type="button" class="btn-secondary" title="Cadastro" aria-label="Cadastro">Cadastro</button>
-            <span id="auth-indicador" class="auth-indicador off">Off</span>
             <button id="btn-login-google" type="button" class="btn-primary" title="Entrar com Google" aria-label="Entrar com Google">Entrar</button>
             <button id="btn-logout" type="button" class="btn-secondary" style="display: none" title="Sair" aria-label="Sair">Sair</button>
           </div>
         </div>
+        <p id="usuario-logado" class="status" style="margin: 0 0 8px">Nao autenticado.</p>
         <p id="status-conexao" class="status">Conectando...</p>
+        <hr class="section-divider" />
+        <div class="cadastro-toolbar">
+          <button id="btn-abrir-cadastro" type="button" class="btn-secondary" title="Cadastro" aria-label="Cadastro">Cadastro</button>
+        </div>
 
         <details id="painel-cadastro" class="cadastro-detalhes">
           <summary id="resumo-cadastro" class="resumo-oculto">Cadastro</summary>
@@ -398,7 +417,7 @@
             </div>
 
             <div id="campo-disciplina" class="field">
-              <label>Disciplina</label>
+              <label>Unidade Curricular</label>
               <div class="disciplina-tabs" id="disciplina-form-tabs">
                 <button class="tab-btn" type="button" data-role="disciplina-form-btn" data-value="Semiologia Clínica 1">
                   Semiologia Clínica 1
@@ -452,7 +471,7 @@
 
         <div id="painel-turma" class="table-wrap">
           <div class="field" style="max-width: 520px; margin-bottom: 12px">
-            <label>Disciplina exibida na tabela</label>
+            <label>Unidade Curricular exibida na tabela</label>
             <div class="disciplina-tabs" id="filtro-disciplina-tabs">
               <button class="tab-btn" type="button" data-role="filtro-disciplina-btn" data-value="Semiologia Clínica 1">
                 Semiologia Clínica 1
