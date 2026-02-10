@@ -181,7 +181,7 @@
         display: flex;
         gap: 12px;
         align-items: center;
-        justify-content: space-between;
+        justify-content: flex-end;
         margin-bottom: 8px;
       }
 
@@ -189,7 +189,6 @@
         display: flex;
         gap: 14px;
         align-items: center;
-        margin-left: auto;
       }
 
       .auth-indicador {
@@ -385,9 +384,9 @@
 
       <section class="card">
         <div class="auth-bar">
-          <span id="auth-indicador" class="auth-indicador off">Off</span>
           <div class="auth-actions">
             <button id="btn-login-google" type="button" class="btn-primary" title="Entrar com Google" aria-label="Entrar com Google">Entrar</button>
+            <span id="auth-indicador" class="auth-indicador off">Off</span>
             <button id="btn-logout" type="button" class="btn-secondary" style="display: none" title="Sair" aria-label="Sair">Sair</button>
           </div>
         </div>
@@ -884,7 +883,6 @@
           atualizarModoLancamento(true, nome);
           painelCadastro.open = true;
           atualizarPainelCadastro();
-          dataInput.focus();
           return;
         }
 
