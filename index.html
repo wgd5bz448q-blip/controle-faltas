@@ -188,26 +188,45 @@
 
       .auth-actions {
         display: flex;
-        gap: 8px;
+        gap: 14px;
         align-items: center;
       }
 
       .auth-indicador {
         display: inline-flex;
         align-items: center;
-        padding: 10px 14px;
-        border-radius: 999px;
+        padding: 0;
+        border-radius: 0;
         font-weight: 700;
       }
 
       .auth-indicador.on {
-        background: #e7f7f3;
         color: #0f766e;
       }
 
       .auth-indicador.off {
-        background: #fef2f2;
         color: #b91c1c;
+      }
+
+      #btn-abrir-cadastro,
+      #btn-logout,
+      #btn-login-google {
+        background: transparent;
+        border: none;
+        color: #334155;
+        padding: 0;
+        border-radius: 0;
+        min-width: unset;
+        height: auto;
+        font-size: 1.05rem;
+        font-weight: 700;
+      }
+
+      #btn-abrir-cadastro:hover,
+      #btn-logout:hover,
+      #btn-login-google:hover {
+        background: transparent;
+        color: #0f766e;
       }
 
       .btn-danger {
