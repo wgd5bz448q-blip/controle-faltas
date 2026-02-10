@@ -572,7 +572,7 @@
         campoNome.classList.toggle("hidden", rapido);
         campoDisciplina.classList.toggle("hidden", rapido);
         campoModoRapido.classList.toggle("hidden", !rapido);
-        campoToggleObservacao.classList.toggle("hidden", rapido);
+        campoToggleObservacao.classList.remove("hidden");
         if (rapido) {
           usarObservacao.checked = false;
           atualizarCampoObservacao();
