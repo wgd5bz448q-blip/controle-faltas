@@ -343,6 +343,35 @@
         gap: 8px;
       }
 
+      .resumo-dia {
+        margin-top: 14px;
+        border: 1px solid #d7e2ef;
+        border-radius: 12px;
+        padding: 12px;
+        background: #f8fbff;
+      }
+
+      .resumo-dia h3 {
+        margin: 0 0 8px;
+      }
+
+      .resumo-dia-topo {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        align-items: end;
+        margin-bottom: 8px;
+      }
+
+      .resumo-dia-lista {
+        margin: 0;
+        padding-left: 18px;
+      }
+
+      .resumo-dia-lista li {
+        margin: 4px 0;
+      }
+
       .tab-btn {
         background: #e7eef6;
         color: #1f2a37;
@@ -366,6 +395,10 @@
         }
 
         .disciplina-tabs {
+          grid-template-columns: 1fr;
+        }
+
+        .resumo-dia-topo {
           grid-template-columns: 1fr;
         }
 
@@ -491,6 +524,20 @@
             <tbody id="lista-faltas"></tbody>
           </table>
           <p id="mensagem-vazia" class="empty">Nenhuma falta registrada ainda.</p>
+
+          <section class="resumo-dia" aria-live="polite">
+            <h3>Faltas do dia</h3>
+            <div class="resumo-dia-topo">
+              <div class="field" style="margin: 0">
+                <label for="filtro-data-dia">Dia da consulta</label>
+                <input id="filtro-data-dia" type="date" />
+              </div>
+              <button id="btn-listar-faltas-dia" type="button" class="btn-secondary" style="height: 44px">Listar</button>
+            </div>
+            <p id="titulo-faltas-dia" style="margin: 0 0 6px; font-weight: 700"></p>
+            <ul id="lista-faltas-dia" class="resumo-dia-lista"></ul>
+            <p id="mensagem-faltas-dia" class="empty" style="display: none"></p>
+          </section>
         </div>
       </section>
     </main>
@@ -526,6 +573,11 @@
       const faltaInput = document.getElementById("falta");
       const listaAlunos = document.getElementById("alunos-lista");
       const filtroDisciplina = document.getElementById("filtro-disciplina");
+      const filtroDataDia = document.getElementById("filtro-data-dia");
+      const btnListarFaltasDia = document.getElementById("btn-listar-faltas-dia");
+      const tituloFaltasDia = document.getElementById("titulo-faltas-dia");
+      const listaFaltasDia = document.getElementById("lista-faltas-dia");
+      const mensagemFaltasDia = document.getElementById("mensagem-faltas-dia");
       const tituloTabela = document.getElementById("titulo-tabela");
       const disciplinaInput = document.getElementById("disciplina");
       const botoesFiltroDisciplina = document.querySelectorAll('[data-role="filtro-disciplina-btn"]');
@@ -755,6 +807,57 @@
           `;
           lista.appendChild(tr);
         });
+
+        atualizarListaFaltasDia();
+      };
+
+      const atualizarListaFaltasDia = () => {
+        const disciplinaSelecionada = filtroDisciplina.value;
+        const dataSelecionada = filtroDataDia.value;
+
+        listaFaltasDia.innerHTML = "";
+        mensagemFaltasDia.style.display = "none";
+
+        if (!dataSelecionada) {
+          tituloFaltasDia.textContent = "";
+          mensagemFaltasDia.textContent = "Selecione uma data para listar as faltas.";
+          mensagemFaltasDia.style.display = "block";
+          return;
+        }
+
+        tituloFaltasDia.textContent = `${disciplinaSelecionada} - ${formatarData(dataSelecionada)}`;
+
+        const faltasDoDia = registros.filter(
+          (registro) =>
+            registro.disciplina === disciplinaSelecionada &&
+            registro.data === dataSelecionada &&
+            (Number.parseInt(registro.falta, 10) || 0) > 0
+        );
+
+        if (faltasDoDia.length === 0) {
+          mensagemFaltasDia.textContent = "Nenhum aluno com falta nessa data.";
+          mensagemFaltasDia.style.display = "block";
+          return;
+        }
+
+        const porAluno = new Map();
+
+        faltasDoDia.forEach((registro) => {
+          const chave = normalizarNome(registro.nome);
+          const horas = Number.parseInt(registro.falta, 10) || 0;
+          if (!porAluno.has(chave)) {
+            porAluno.set(chave, { nome: registro.nome.trim(), horas: 0 });
+          }
+          porAluno.get(chave).horas += horas;
+        });
+
+        [...porAluno.values()]
+          .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"))
+          .forEach((item) => {
+            const li = document.createElement("li");
+            li.textContent = `${item.nome} - ${item.horas}h`;
+            listaFaltasDia.appendChild(li);
+          });
       };
 
       const carregarRegistrosFirebase = () => {
@@ -851,6 +954,9 @@
           atualizarTabela();
         });
       });
+
+      btnListarFaltasDia.addEventListener("click", atualizarListaFaltasDia);
+      filtroDataDia.addEventListener("change", atualizarListaFaltasDia);
 
       botoesDisciplinaForm.forEach((botao) => {
         botao.addEventListener("click", () => {
@@ -1168,6 +1274,7 @@
       atualizarUIAutenticacao(null);
       atualizarModoLancamento(false);
       preencherDataComHoje();
+      filtroDataDia.value = dataHojeISO();
       atualizarCampoObservacao();
       iniciarArmazenamento();
     </script>
