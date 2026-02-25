@@ -357,7 +357,7 @@
 
       .resumo-dia-topo {
         display: grid;
-        grid-template-columns: 1fr auto;
+        grid-template-columns: 1fr auto auto;
         gap: 8px;
         align-items: end;
         margin-bottom: 8px;
@@ -533,6 +533,7 @@
                 <input id="filtro-data-dia" type="date" />
               </div>
               <button id="btn-listar-faltas-dia" type="button" class="btn-secondary" style="height: 44px">Listar</button>
+              <button id="btn-copiar-faltas-dia" type="button" class="btn-secondary" style="height: 44px">Copiar faltas do dia</button>
             </div>
             <p id="titulo-faltas-dia" style="margin: 0 0 6px; font-weight: 700"></p>
             <ul id="lista-faltas-dia" class="resumo-dia-lista"></ul>
@@ -575,6 +576,7 @@
       const filtroDisciplina = document.getElementById("filtro-disciplina");
       const filtroDataDia = document.getElementById("filtro-data-dia");
       const btnListarFaltasDia = document.getElementById("btn-listar-faltas-dia");
+      const btnCopiarFaltasDia = document.getElementById("btn-copiar-faltas-dia");
       const tituloFaltasDia = document.getElementById("titulo-faltas-dia");
       const listaFaltasDia = document.getElementById("lista-faltas-dia");
       const mensagemFaltasDia = document.getElementById("mensagem-faltas-dia");
@@ -860,6 +862,35 @@
           });
       };
 
+      const obterResumoFaltasDia = () => {
+        const disciplinaSelecionada = filtroDisciplina.value;
+        const dataSelecionada = filtroDataDia.value;
+
+        if (!dataSelecionada) return null;
+
+        const faltasDoDia = registros.filter(
+          (registro) =>
+            registro.disciplina === disciplinaSelecionada &&
+            registro.data === dataSelecionada &&
+            (Number.parseInt(registro.falta, 10) || 0) > 0
+        );
+
+        if (faltasDoDia.length === 0) return null;
+
+        const porAluno = new Map();
+        faltasDoDia.forEach((registro) => {
+          const chave = normalizarNome(registro.nome);
+          const horas = Number.parseInt(registro.falta, 10) || 0;
+          if (!porAluno.has(chave)) {
+            porAluno.set(chave, { nome: registro.nome.trim(), horas: 0 });
+          }
+          porAluno.get(chave).horas += horas;
+        });
+
+        const itens = [...porAluno.values()].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+        return { disciplina: disciplinaSelecionada, data: dataSelecionada, itens };
+      };
+
       const carregarRegistrosFirebase = () => {
         if (unsubscribeRegistros) unsubscribeRegistros();
         unsubscribeRegistros = db.collection("faltas").onSnapshot(
@@ -957,6 +988,23 @@
 
       btnListarFaltasDia.addEventListener("click", atualizarListaFaltasDia);
       filtroDataDia.addEventListener("change", atualizarListaFaltasDia);
+      btnCopiarFaltasDia.addEventListener("click", async () => {
+        const resumo = obterResumoFaltasDia();
+        if (!resumo) {
+          alert("Nenhuma falta para copiar na data selecionada.");
+          return;
+        }
+
+        const linhasAlunos = resumo.itens.map((item) => `- ${item.nome}: ${item.horas}h`).join("\n");
+        const texto = `Disciplina: ${resumo.disciplina}\nData: ${formatarData(resumo.data)}\n\n${linhasAlunos}`;
+
+        try {
+          await navigator.clipboard.writeText(texto);
+          alert("Lista de faltas copiada.");
+        } catch (_error) {
+          alert("Nao foi possivel copiar automaticamente.");
+        }
+      });
 
       botoesDisciplinaForm.forEach((botao) => {
         botao.addEventListener("click", () => {
