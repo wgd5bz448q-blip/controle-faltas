@@ -748,6 +748,7 @@
             <td>${aluno.ultimoRegistro}</td>
             <td>
               <button class="acoes-btn" data-action="abrir-cadastro-completo" data-nome="${escapeHtml(aluno.nome)}" data-disciplina="${escapeHtml(disciplinaSelecionada)}" type="button" title="Cadastro completo" aria-label="Cadastro completo">⚙</button>
+              <button class="acoes-btn" data-action="copiar-falta" data-nome="${escapeHtml(aluno.nome)}" data-disciplina="${escapeHtml(disciplinaSelecionada)}" type="button" title="Copiar falta" aria-label="Copiar falta">📋</button>
               <button class="acoes-btn" data-action="ver-dias" data-nome="${escapeHtml(aluno.nome)}" data-historico="${escapeHtml(historico)}" type="button" title="Ver dias" aria-label="Ver dias">📅</button>
               <button class="acoes-btn danger" data-action="remover-aluno" data-nome="${escapeHtml(aluno.nome)}" data-disciplina="${escapeHtml(disciplinaSelecionada)}" type="button" title="Remover aluno" aria-label="Remover aluno">🗑️</button>
             </td>
@@ -909,6 +910,39 @@
             return;
           }
           alert(`Faltas de ${nome}:\n\n- ${historico.join("\n- ")}`);
+          return;
+        }
+
+        if (acao === "copiar-falta") {
+          const nome = (alvo.dataset.nome || "").trim();
+          const disciplina = (alvo.dataset.disciplina || "").trim();
+          if (!nome || !disciplina) return;
+
+          const dataSelecionada = dataInput.value || dataHojeISO();
+          const nomeNormalizado = nome.toLocaleLowerCase("pt-BR");
+          const candidatos = registros.filter(
+            (registro) =>
+              registro.disciplina === disciplina &&
+              registro.data === dataSelecionada &&
+              Number.parseInt(registro.falta, 10) > 0 &&
+              registro.nome.trim().toLocaleLowerCase("pt-BR") === nomeNormalizado
+          );
+
+          if (candidatos.length === 0) {
+            alert(`Sem falta registrada para ${nome} em ${formatarData(dataSelecionada)}.`);
+            return;
+          }
+
+          const registroData = candidatos[candidatos.length - 1];
+          const horas = Number.parseInt(registroData.falta, 10) || 0;
+          const texto = `${nome} - ${formatarData(dataSelecionada)} - ${horas}h`;
+
+          try {
+            await navigator.clipboard.writeText(texto);
+            alert(`Copiado: ${texto}`);
+          } catch (_error) {
+            alert("Nao foi possivel copiar automaticamente.");
+          }
           return;
         }
 
