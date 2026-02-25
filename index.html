@@ -209,7 +209,9 @@
 
       #btn-abrir-cadastro,
       #btn-logout,
-      #btn-login-google {
+      #btn-login-google,
+      #btn-voltar-site,
+      #btn-avancar-site {
         background: transparent;
         border: none;
         color: #334155;
@@ -223,7 +225,9 @@
 
       #btn-abrir-cadastro:hover,
       #btn-logout:hover,
-      #btn-login-google:hover {
+      #btn-login-google:hover,
+      #btn-voltar-site:hover,
+      #btn-avancar-site:hover {
         background: transparent;
         color: #0f766e;
       }
@@ -418,6 +422,8 @@
       <section class="card">
         <div class="auth-bar">
           <div class="auth-actions">
+            <button id="btn-voltar-site" type="button" class="btn-secondary" title="Voltar" aria-label="Voltar">←</button>
+            <button id="btn-avancar-site" type="button" class="btn-secondary" title="Avançar" aria-label="Avançar">→</button>
             <button id="btn-login-google" type="button" class="btn-primary" title="Entrar com Google" aria-label="Entrar com Google">Entrar</button>
             <span id="auth-indicador" class="auth-indicador off">Off</span>
             <button id="btn-logout" type="button" class="btn-secondary" style="display: none" title="Sair" aria-label="Sair">Sair</button>
@@ -557,6 +563,8 @@
       const usuarioLogado = document.getElementById("usuario-logado");
       const btnLoginGoogle = document.getElementById("btn-login-google");
       const btnLogout = document.getElementById("btn-logout");
+      const btnVoltarSite = document.getElementById("btn-voltar-site");
+      const btnAvancarSite = document.getElementById("btn-avancar-site");
       const btnAbrirCadastro = document.getElementById("btn-abrir-cadastro");
       const btnCadastrarAluno = document.getElementById("btn-cadastrar-aluno");
       const authIndicador = document.getElementById("auth-indicador");
@@ -1238,6 +1246,14 @@
         } catch (_error) {
           alert("Nao foi possivel sair.");
         }
+      });
+
+      btnVoltarSite.addEventListener("click", () => {
+        window.history.back();
+      });
+
+      btnAvancarSite.addEventListener("click", () => {
+        window.history.forward();
       });
 
       btnAbrirCadastro.addEventListener("click", () => {
