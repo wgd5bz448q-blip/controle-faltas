@@ -283,14 +283,14 @@
       }
 
       .acoes-btn {
-        width: 42px;
-        height: 42px;
+        width: 50px;
+        height: 50px;
         padding: 0;
-        border-radius: 10px;
-        border: 1px solid var(--border);
+        border-radius: 14px;
+        border: 1px solid #c9d5e3;
         background: #fff;
         color: #334155;
-        font-size: 1.15rem;
+        font-size: 1.25rem;
         line-height: 1;
       }
 
@@ -299,12 +299,13 @@
       }
 
       .acoes-btn.danger {
-        color: var(--danger);
-        border-color: #fecaca;
+        background: #fff;
+        color: #ef4444;
+        border: 1px solid #fca5a5;
       }
 
       .acoes-btn.danger:hover {
-        background: #fef2f2;
+        background: #fff5f5;
       }
 
       #acoes-cadastro button {
@@ -1113,6 +1114,9 @@
         const nome = (alvo.dataset.nome || "").trim();
         const disciplina = (alvo.dataset.disciplina || "").trim();
         if (!nome || !disciplina) return;
+
+        const confirmarExclusao = window.confirm(`Tem certeza que deseja excluir ${nome} de ${disciplina}?`);
+        if (!confirmarExclusao) return;
 
         const nomeNormalizado = nome.toLocaleLowerCase("pt-BR");
 
